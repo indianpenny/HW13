@@ -1,0 +1,225 @@
+Change the Javadoc!!!!!!!!!
+
+/**
+ * Linked Character List class
+ *
+ * <p>Purdue University -- CS18000 -- Fall 2024 -- Homework 13 -- Challenge</p>
+ *
+ * @author ...
+ * @version November 13, 2024
+ */
+
+public class LinkedCharList implements LinkedCharListInterface {
+    private CharNode headNode;
+
+    public LinkedCharList() {
+        headNode = null;
+    }
+     
+    public void constructCharList(char[] listChars) {
+        headNode = new CharNode(listChars[0]);
+
+        for (int i = 1; i < listChars.length; i++) {
+            addChar(listChars[i]);
+        }
+    }
+
+   
+    public void addChar(char c) {
+        if (headNode == null) {
+            headNode = new CharNode(c);
+        } else {
+            CharNode nextNode = headNode.getNextNode();
+            CharNode currentNode = headNode;
+
+            while (nextNode != null) {
+                currentNode = nextNode;
+                nextNode = nextNode.getNextNode();
+            }
+
+            currentNode.setNextNode(new CharNode(c));
+        }
+    }
+
+
+    public void insertCharAt(char c, int index) {
+        CharNode newNode = new CharNode(c);
+
+        if (index == 0) {
+            newNode.setNextNode(headNode);
+            headNode = newNode;
+            return;
+        }
+
+        CharNode currentNode = headNode;
+        int p = 0;
+
+        while (currentNode.getNextNode() != null && p < index - 1) {
+            currentNode = currentNode.getNextNode();
+            p++;
+        }
+
+        newNode.setNextNode(currentNode.getNextNode());
+        currentNode.setNextNode(newNode);
+    }
+
+   
+    public char getCharAt(int index) throws IndexOutOfBoundsException {
+        CharNode node = headNode;
+        int p = 0;
+
+        while (node != null) {
+            if (p == index) {
+                return node.getC();
+            }
+
+            node = node.getNextNode();
+            p++;
+        }
+
+        throw new IndexOutOfBoundsException(String.format("Index %d out of bounds for length %d", index, p));
+    }
+
+    
+    public LinkedCharList[] splitLinkedCharList(char regex) {
+        int splitCount = 0;
+        CharNode tempNode = headNode;
+
+        while (tempNode != null) {
+            if (tempNode.getC() == regex) {
+                splitCount++;
+            }
+            tempNode = tempNode.getNextNode();
+        }
+
+        LinkedCharList[] result = new LinkedCharList[splitCount + 1];
+        int listIndex = 0;
+        tempNode = headNode;
+        CharNode currentStart = headNode;
+
+        while (tempNode != null) {
+            if (tempNode.getC() == regex) {
+                result[listIndex] = new LinkedCharList();
+                CharNode tempHead = currentStart;
+
+                while (tempHead != tempNode) {
+                    result[listIndex].addChar(tempHead.getC());
+                    tempHead = tempHead.getNextNode();
+                }
+
+                listIndex++;
+                currentStart = tempNode.getNextNode();
+            }
+            tempNode = tempNode.getNextNode();
+        }
+
+        result[listIndex] = new LinkedCharList();
+        while (currentStart != null) {
+            result[listIndex].addChar(currentStart.getC());
+            currentStart = currentStart.getNextNode();
+        }
+
+        return result;
+    }
+
+}
+
+
+
+RunLocalTest:
+
+public class RunLocalTest {
+    public static void main(String[] args) {
+        testConstructCharList();
+        testAddChar();
+        testInsertCharAt();
+        testGetCharAt();
+        testSplitLinkedCharList();
+    }
+
+    private static void testConstructCharList() {
+        LinkedCharList list = new LinkedCharList();
+        list.constructCharList(new char[]{'A', 'B', 'C'});
+        
+        try {
+            assert list.getCharAt(0) == 'A' : "Failed: Expected 'A' at index 0";
+            assert list.getCharAt(1) == 'B' : "Failed: Expected 'B' at index 1";
+            assert list.getCharAt(2) == 'C' : "Failed: Expected 'C' at index 2";
+            System.out.println("testConstructCharList passed.");
+        } catch (Exception e) {
+            System.out.println("testConstructCharList failed: " + e.getMessage());
+        }
+    }
+
+    private static void testAddChar() {
+        LinkedCharList list = new LinkedCharList();
+        list.addChar('X');
+        list.addChar('Y');
+        list.addChar('Z');
+        
+        try {
+            assert list.getCharAt(0) == 'X' : "Failed: Expected 'X' at index 0";
+            assert list.getCharAt(1) == 'Y' : "Failed: Expected 'Y' at index 1";
+            assert list.getCharAt(2) == 'Z' : "Failed: Expected 'Z' at index 2";
+            System.out.println("testAddChar passed.");
+        } catch (Exception e) {
+            System.out.println("testAddChar failed: " + e.getMessage());
+        }
+    }
+
+    private static void testInsertCharAt() {
+        LinkedCharList list = new LinkedCharList();
+        list.constructCharList(new char[]{'A', 'B', 'D'});
+        list.insertCharAt('C', 2);  // Insert 'C' between 'B' and 'D'
+        
+        try {
+            assert list.getCharAt(2) == 'C' : "Failed: Expected 'C' at index 2";
+            assert list.getCharAt(3) == 'D' : "Failed: Expected 'D' at index 3";
+            System.out.println("testInsertCharAt passed.");
+        } catch (Exception e) {
+            System.out.println("testInsertCharAt failed: " + e.getMessage());
+        }
+    }
+
+    private static void testGetCharAt() {
+        LinkedCharList list = new LinkedCharList();
+        list.constructCharList(new char[]{'A', 'B', 'C'});
+        
+        try {
+            assert list.getCharAt(1) == 'B' : "Failed: Expected 'B' at index 1";
+            System.out.println("testGetCharAt passed.");
+        } catch (Exception e) {
+            System.out.println("testGetCharAt failed: " + e.getMessage());
+        }
+
+        try {
+            list.getCharAt(5);  // Should throw IndexOutOfBoundsException
+            System.out.println("testGetCharAt failed: Expected IndexOutOfBoundsException");
+        } catch (IndexOutOfBoundsException e) {
+            System.out.println("testGetCharAt passed for out of bounds case.");
+        }
+    }
+
+    private static void testSplitLinkedCharList() {
+        LinkedCharList list = new LinkedCharList();
+        list.constructCharList(new char[]{'A', 'B', 'C', 'B', 'D'});
+        
+        LinkedCharList[] splitLists = list.splitLinkedCharList('B');
+        
+        try {
+            assert splitLists.length == 3 : "Failed: Expected 3 split lists";
+            
+            // First split list should contain 'A'
+            assert splitLists[0].getCharAt(0) == 'A' : "Failed: Expected 'A' in first list";
+
+            // Second split list should contain 'C'
+            assert splitLists[1].getCharAt(0) == 'C' : "Failed: Expected 'C' in second list";
+
+            // Third split list should contain 'D'
+            assert splitLists[2].getCharAt(0) == 'D' : "Failed: Expected 'D' in third list";
+            System.out.println("testSplitLinkedCharList passed.");
+        } catch (Exception e) {
+            System.out.println("testSplitLinkedCharList failed: " + e.getMessage());
+        }
+    }
+}
